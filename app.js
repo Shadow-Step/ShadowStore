@@ -23,11 +23,7 @@ app.use(session({
     },
     store: new MongoStore({uri:'mongodb://localhost:27017/',collection:'sessions'})
 }));
-//Register routes
-app.use('/',(req,res)=>{
-    res.render('index');
-})
-app.use('/admin',require('./routes/admin'));
+app.use('/products',require('./routes/products'));
 app.use('/profile',require('./routes/profile'));
 //Init db and start listening
 MongoClient.connect('mongodb://localhost:27017/',{useNewUrlParser: true},(err,client)=>{

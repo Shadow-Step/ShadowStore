@@ -1,3 +1,3 @@
-app.controller('detailController',function($scope){
+app.controller('detailController',function($scope,$http){
     
 });
