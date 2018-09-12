@@ -1,5 +1,7 @@
 const route = require('express').Router();
+const ObjectID = require('mongodb').ObjectID;
 
+//Check access
 route.use((req,res,next)=>{
     if(!req.session.isAdmin){
         return res.redirect('/profile/login');
@@ -8,6 +10,80 @@ route.use((req,res,next)=>{
         next();
     }
 })
+
+/////
+//Products
+/////
+
+//Get all
+route.get('/products',(req,res)=>{
+    const db = req.app.db.products;
+    db.find().toArray((err,products)=>{
+        res.status(200).json(products);
+    });
+});
+//Insert one
+route.post('/products/add',(req,res)=>{
+    const db = req.app.db.products;
+    let product = req.body;
+    db.insertOne(product,(err,result)=>{
+        if(err){
+            return console.log(err);
+        }
+        res.status(200).json({message: 'success'});
+    });
+});
+//Remove one
+route.get('/products/remove/:id',(req,res)=>{
+    const db = req.app.db.products;
+    if(req.params.id.length != 24){
+        return res.status(400).json({message: 'invalid id'});
+    }
+    else{
+        let _id = new ObjectID(req.params.id);
+        db.remove({_id:_id},(err,result)=>{
+            if(err){
+                return console.log(err);
+            }
+            res.status(200).json({message: 'success'});
+        });
+    }
+});
+//Edit one
+route.post('/products/edit/:id',(req,res)=>{
+    const db = req.app.db.products;
+    if(req.params.id.length != 24){
+        return res.status(400).json({message: 'invalid id'});
+    }
+    else{
+        let product = req.body;
+        let _id = new ObjectID(req.params.id);
+        db.updateOne({_id: _id},{$set:{name: product.name,price: product.price,category: product.category}},(err,result)=>{
+            if(err){
+                return console.log(err);
+            }
+            res.status(200).json({message: 'success'});
+        });
+    }
+});
+//Get one
+route.get('/products/:id',(req,res)=>{
+    const db = req.app.db.products;
+    if(req.params.id.length != 24){
+        return res.status(400).json({message: 'invalid id'});
+    }
+    else{
+        let _id = new ObjectID(req.params.id);
+        db.findOne({_id:_id},(err,result)=>{
+            if(err){
+                return console.log(err);
+            }
+            //res.status(200).json(result);
+            res.render('prod',{product: result});
+        });
+    }
+});
+// Next temp
 route.get('/',(req,res)=>{
     const db = req.app.db.users;
     db.findOne({email: req.session.email},(err,user)=>{
@@ -16,4 +92,5 @@ route.get('/',(req,res)=>{
         }
     });
 })
+
 module.exports = route;
