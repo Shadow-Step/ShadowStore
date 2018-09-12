@@ -1,0 +1,14 @@
+{
+    "name": "shadowstore",
+    "version": "0.0.1",
+    "description": "not yet",
+    "dependencies": {
+        "bcryptjs": "^2.4.3",
+        "body-parser": "^1.18.3",
+        "connect-mongodb-session": "^2.0.3",
+        "express": "^4.16.3",
+        "express-session": "^1.15.6",
+        "hbs": "^4.0.1",
+        "mongodb": "^3.1.4"
+    }
+}
