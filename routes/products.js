@@ -16,7 +16,7 @@ const ObjectID = require('mongodb').ObjectID;
 /////
 
 //Get all
-route.get('/',(req,res)=>{
+route.get('/get',(req,res)=>{
     const db = req.app.db.products;
     db.find().toArray((err,products)=>{
         res.status(200).json(products);
@@ -67,7 +67,7 @@ route.post('/edit/:id',(req,res)=>{
     }
 });
 //Get one
-route.get('/:id',(req,res)=>{
+route.get('/get/:id',(req,res)=>{
     const db = req.app.db.products;
     if(req.params.id.length != 24){
         return res.status(400).json({message: 'invalid id'});

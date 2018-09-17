@@ -26,6 +26,7 @@ route.post('/register',(req,res)=>{
         }
     })
 })
+/////
 //Login
 route.get('/login',(req,res,)=>{
     const db = req.app.db.users;
@@ -83,7 +84,7 @@ route.get('/:id',(req,res)=>{
                 return res.status(200).json({message: user});
             }
             else{
-                return res.status(400).json({message: 'its not you'});
+                return res.status(400).json({message: 'error'});
             }
         });
     }

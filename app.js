@@ -8,7 +8,7 @@ const app = express();
 
 //temp engine
 app.set('view engine','hbs');
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/client'));
 //Init parser
 app.use(bodyParser.urlencoded({extended: false}));
 //Init session
@@ -23,6 +23,10 @@ app.use(session({
     },
     store: new MongoStore({uri:'mongodb://localhost:27017/',collection:'sessions'})
 }));
+//Set routes
+app.get('/',(req,res)=>{
+    res.redirect('/main.html')
+})
 app.use('/products',require('./routes/products'));
 app.use('/profile',require('./routes/profile'));
 //Init db and start listening
