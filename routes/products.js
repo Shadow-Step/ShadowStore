@@ -23,14 +23,24 @@ route.get('/get',(req,res)=>{
     });
 });
 //Insert one
-route.post('/add',(req,res)=>{
-    const db = req.app.db.products;
+route.post('/insert',(req,res)=>{
+    let db = req.app.db.products;
     let product = req.body;
     db.insertOne(product,(err,result)=>{
         if(err){
             return console.log(err);
         }
-        res.status(200).json({message: 'success'});
+        let categories = req.app.db.categories;
+        categories.countDocuments({name: product.category},(err,count)=>{
+            if(count == 0){
+                categories.insertOne({name: product.category},(err,insert)=>{
+                    if(err){
+                        console.log(err);
+                    }
+                });
+            }
+            res.status(200).json({message: 'success'});
+        })
     });
 });
 //Remove one

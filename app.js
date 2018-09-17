@@ -25,7 +25,14 @@ app.use(session({
 }));
 //Set routes
 app.get('/',(req,res)=>{
-    res.redirect('/main.html')
+    const base = req.app.db.categories;
+    const prod = req.app.db.products;
+    base.find().toArray((err,result)=>{
+        prod.find().toArray((err,asd)=>{
+            res.render('index',{categories: result, products: asd});
+        });
+    });
+    
 })
 app.use('/products',require('./routes/products'));
 app.use('/profile',require('./routes/profile'));
