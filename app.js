@@ -29,6 +29,7 @@ app.get('/',(req,res)=>{
 })
 app.use('/products',require('./routes/products'));
 app.use('/profile',require('./routes/profile'));
+app.use('/category',require('./routes/category'));
 //Init db and start listening
 MongoClient.connect('mongodb://localhost:27017/',{useNewUrlParser: true},(err,client)=>{
     if(err){
@@ -37,6 +38,7 @@ MongoClient.connect('mongodb://localhost:27017/',{useNewUrlParser: true},(err,cl
     const db = client.db('ShadowStore');
     db.users = db.collection('users');
     db.products = db.collection('products');
+    db.categories = db.collection('categories');
     app.db = db;
     app.listen(3000);
 });
