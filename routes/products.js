@@ -1,95 +1,82 @@
 const route = require('express').Router();
 const ObjectID = require('mongodb').ObjectID;
+const Product = require('../lib/model').Product;
+const Category = require('../lib/model').Category;
+const idIsCorrect = require('../lib/common').idIsCorrect;
 
-// //Check access
-// route.use((req,res,next)=>{
-//     if(!req.session.isAdmin){
-//         return res.redirect('/profile/login');
-//     }
-//     else{
-//         next();
-//     }
-// })
-
-/////
-//Products
-/////
+//Access check middleware must be here!
 
 //Get all
 route.get('/get',(req,res)=>{
+
     const db = req.app.db.products;
-    db.find().toArray((err,products)=>{
-        res.status(200).json(products);
-    });
+    db.find().toArray()
+    .then(array => res.status(200).json(array))
+    .catch(e => console.log(e));
 });
+
 //Insert one
 route.post('/insert',(req,res)=>{
-    let db = req.app.db.products;
-    let product = req.body;
-    db.insertOne(product,(err,result)=>{
-        if(err){
-            return console.log(err);
-        }
-        let categories = req.app.db.categories;
-        categories.countDocuments({name: product.category},(err,count)=>{
-            if(count == 0){
-                categories.insertOne({name: product.category},(err,insert)=>{
-                    if(err){
-                        console.log(err);
-                    }
-                });
-            }
-            res.status(200).json({message: 'success'});
-        })
-    });
+
+    const db = req.app.db.products;
+    const dbcat = req.app.db.categories;
+    const product = new Product(req.body);
+
+    //Insert product, then check categories and insert new if needed
+    db.insertOne(product)
+    .then(() => dbcat.countDocuments({name: product.category}))
+    .then((count) => count == 0 ? dbcat.insertOne(new Category({name: product.category})) : Promise.resolve())
+    .then(() => res.status(200).json({message: 'product insert success'}))
+    .catch(e => console.log(e));
 });
+
 //Remove one
 route.get('/remove/:id',(req,res)=>{
-    const db = req.app.db.products;
-    if(req.params.id.length != 24){
+
+    if(!idIsCorrect(req.params.id)){
         return res.status(400).json({message: 'invalid id'});
     }
-    else{
-        let _id = new ObjectID(req.params.id);
-        db.remove({_id:_id},(err,result)=>{
-            if(err){
-                return console.log(err);
-            }
-            res.status(200).json({message: 'success'});
-        });
-    }
+
+    const db = req.app.db.products;
+    const _id = new ObjectID(req.params.id);
+
+    db.remove({_id:_id})
+    .then(() => res.status(200).json({message: 'product remove success'}))
+    .catch(e => console.log(e));
 });
+
 //Edit one
 route.post('/edit/:id',(req,res)=>{
-    const db = req.app.db.products;
-    if(req.params.id.length != 24){
+
+    if(!idIsCorrect(req.params.id)){
         return res.status(400).json({message: 'invalid id'});
     }
-    else{
-        let product = req.body;
-        let _id = new ObjectID(req.params.id);
-        db.updateOne({_id: _id},{$set:{name: product.name,price: product.price,category: product.category}},(err,result)=>{
-            if(err){
-                return console.log(err);
-            }
-            res.status(200).json({message: 'success'});
-        });
-    }
+
+    const db = req.app.db.products;
+    const dbcat = req.app.db.categories;
+    const product = new Product(req.body);
+    const _id = new ObjectID(req.params.id);
+
+    //Update product, if category changed - check categories and insert new if needed
+    db.updateOne({_id: _id}, product)
+    .then(() => dbcat.countDocuments({name: product.category}))
+    .then((count) => count == 0 ? dbcat.insertOne(new Category({name: product.category})) : Promise.resolve())
+    .then(() => res.status(200).json({message: 'product edit success'}))
+    .catch(e => console.log(e));
 });
+
 //Get one
 route.get('/get/:id',(req,res)=>{
-    const db = req.app.db.products;
-    if(req.params.id.length != 24){
+
+    if(!idIsCorrect(req.params.id)){
         return res.status(400).json({message: 'invalid id'});
     }
-    else{
-        let _id = new ObjectID(req.params.id);
-        db.findOne({_id:_id},(err,result)=>{
-            if(err){
-                return console.log(err);
-            }
-            res.status(200).json(result);
-        });
-    }
+
+    const db = req.app.db.products;
+    let _id = new ObjectID(req.params.id);
+
+    db.findOne({_id:_id})
+    .then(product => res.status(200).json(product))
+    .catch(e => console.log(e));
 });
 module.exports = route;
