@@ -8,7 +8,7 @@ const app = express();
 
 //temp engine
 app.set('view engine','hbs');
-app.use(express.static(__dirname + '/client'));
+//app.use(express.static(__dirname + '/client'));
 //Init parser
 app.use(bodyParser.urlencoded({extended: false}));
 //Init session
@@ -29,7 +29,7 @@ app.get('/',(req,res)=>{
     const prod = req.app.db.products;
     base.find().toArray((err,result)=>{
         prod.find().toArray((err,asd)=>{
-            res.render('index',{categories: result, products: asd});
+            res.render('categories',{categories: result, products: asd});
         });
     });
     
@@ -37,16 +37,17 @@ app.get('/',(req,res)=>{
 app.use('/products',require('./routes/products'));
 app.use('/profile',require('./routes/profile'));
 app.use('/category',require('./routes/category'));
+
 //Init db and start listening
-MongoClient.connect('mongodb://localhost:27017/',{useNewUrlParser: true},(err,client)=>{
-    if(err){
-        console.log(err);
-    }
+MongoClient.connect('mongodb://localhost:27017/',{useNewUrlParser: true})
+.then(client =>{
     const db = client.db('ShadowStore');
     db.users = db.collection('users');
     db.products = db.collection('products');
     db.categories = db.collection('categories');
     app.db = db;
-    app.listen(3000);
-});
+})
+.then(()=> app.listen(3000))
+.catch(e => console.log(e));
+
 module.exports = app;
